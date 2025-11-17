@@ -1,0 +1,90 @@
+# ======================================
+# IGNORAR ARCHIVOS DE PYTHON
+# ======================================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ======================================
+# ENTORNO VIRTUAL
+# ======================================
+venv/
+env/
+ENV/
+.venv/
+
+# ======================================
+# ARCHIVOS DE CONFIGURACIÓN / SECRETOS
+# ======================================
+*.env
+.env.*
+*.local
+secrets.json
+
+# ======================================
+# BASE DE DATOS SQLITE (si usas sqlite3)
+# ======================================
+db.sqlite3
+db.sqlite3-journal
+
+# ======================================
+# ARCHIVOS DE DJANGO
+# ======================================
+# Archivos de migraciones compiladas
+*/migrations/*.pyc
+*/migrations/*.pyo
+*/migrations/*~
+# Mantener migraciones excepto archivo __init__.py
+*/migrations/[0-9][0-9][0-9][0-9]_*.py
+
+# Archivos generados
+staticfiles/
+media/
+dist/
+build/
+
+# ======================================
+# LOGS
+# ======================================
+*.log
+*.out
+*.txt
+
+# ======================================
+# CACHE
+# ======================================
+*.cache
+cache/
+django_cache/
+__cache__/
+
+# ======================================
+# EDITORES
+# ======================================
+
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+*.iml
+
+# ======================================
+# SISTEMA OPERATIVO
+# ======================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ======================================
+# OTROS
+# ======================================
+*.bak
+*.swp
+*~

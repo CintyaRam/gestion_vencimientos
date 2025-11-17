@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Artículos{% endblock %}
+
+{% block content %}
+<h2 class="mb-4 text-danger fw-bold">Lista de Artículos</h2>
+<form method="get" class="row g-2 mb-3">
+
+    <!-- Filtro por Departamento -->
+    <div class="col-auto">
+        <label for="departamento" class="col-form-label">Departamento:</label>
+    </div>
+    <div class="col-auto">
+        <select name="departamento" id="departamento" class="form-select form-select-sm">
+            <option value="">Todos</option>
+            {% for depto in departamentos %}
+            <option value="{{ depto.numero_departamento }}" {% if departamento_seleccionado == depto.numero_departamento %}selected{% endif %}>
+                {{ depto.numero_departamento }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Filtro por Estado -->
+    <div class="col-auto">
+        <label for="estado" class="col-form-label">Estado:</label>
+    </div>
+    <div class="col-auto">
+        <select name="estado" id="estado" class="form-select form-select-sm">
+            <option value="">Todos</option>
+            {% for e in estados %}
+            <option value="{{ e }}" {% if estado_seleccionado == e %}selected{% endif %}>
+                {{ e }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <!-- Botones -->
+    <div class="col-auto">
+        <button type="submit" class="btn btn-sm btn-primary">Aplicar</button>
+        <a href="{% url 'lista_articulos' %}" class="btn btn-sm btn-secondary">Limpiar</a>
+    </div>
+
+</form>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Nombre Artículo</th>
+                <th>Departamento</th>
+                <th>Lotes Activos</th>
+                <th>Acciones (Admin)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for articulo in articulos_ordenados %}
+            <tr>
+                <td>{{ articulo.nombre }}</td>
+                <td>{{ articulo.departamento.numero_departamento }}</td>
+
+                <td>
+                    {% for lote in articulo.lotes_activos %}
+                    {% if not estado_seleccionado or lote.estado_vencimiento == estado_seleccionado %}
+                    <div class="p-2 mb-2 border rounded bg-light">
+                        <strong>Lote:</strong> {{ lote.numero_lote }}<br>
+
+                        <!-- Fecha -->
+                        <span class="text-muted">
+                            Vence: <strong>{{ lote.fecha_vencimiento }}</strong>
+                        </span>
+                        <br>
+
+                        <!-- Semáforo -->
+                        {% if lote.estado_vencimiento == 'Vencido - Quitar de Sala inmediatamente' %}
+                        <span class="semaforo vencido-quitar-sala">{{ lote.estado_vencimiento }}</span>
+                        {% elif lote.estado_vencimiento == 'Por vencer (tomar acción correctiva)' %}
+                        <span class="semaforo por-vencer-tomar-accion-correctiva">{{ lote.estado_vencimiento }}</span>
+                        {% elif lote.estado_vencimiento == 'Cerca de vencimiento' %}
+                        <span class="semaforo cerca-de-vencimiento">{{ lote.estado_vencimiento }}</span>
+                        {% else %}
+                        <span class="semaforo buen-estado">{{ lote.estado_vencimiento }}</span>
+                        {% endif %}
+                        <br>
+
+                        <span class="text-muted">Responsable: {{ lote.responsable_registro.username }}</span>
+                        <br>
+
+                        {% if user.is_authenticated %}
+                        {% if es_administrador or lote.responsable_registro == user %}
+                        <a href="{% url 'editar_lote' lote.pk %}" class="btn btn-warning btn-sm mt-1">Editar</a>
+                        <a href="{% url 'eliminar_lote' lote.pk %}" class="btn btn-danger btn-sm mt-1">Eliminar</a>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% empty %}
+                    <span class="text-muted">No hay lotes activos para este artículo.</span>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% if user.is_authenticated and es_administrador %}
+                    <a href="{% url 'editar_articulo' articulo.pk %}" class="btn btn-warning btn-sm">Editar Art.</a>
+                    <a href="{% url 'eliminar_articulo' articulo.pk %}" class="btn btn-danger btn-sm">Eliminar Art.</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-muted">No hay artículos registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Botones inferiores -->
+<div class="mt-3 d-flex gap-2">
+    {% if user.is_authenticated %}
+    <a href="{% url 'crear_lote' %}" class="btn btn-primary">Agregar Nuevo Lote</a>
+
+    {% if es_administrador %}
+    <a href="{% url 'crear_articulo' %}" class="btn btn-success">Agregar Nuevo Artículo</a>
+    {% endif %}
+    {% endif %}
+
+    <a href="{% url 'home' %}" class="btn btn-secondary">Volver al Inicio</a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmar Eliminación{% endblock %}
+
+{% block content %}
+<h2>¿Estás seguro de que quieres eliminar el artículo "{{ object.nombre }}"?</h2>
+<p>Esta acción marcará el artículo y sus lotes como inactivos.</p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Sí, eliminar</button>
+    <a href="{% url 'lista_articulos' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}
