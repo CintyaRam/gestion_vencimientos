@@ -22,22 +22,20 @@ ENV/
 secrets.json
 
 # ======================================
-# BASE DE DATOS SQLITE (si usas sqlite3)
+# BASE DE DATOS SQLITE
 # ======================================
 db.sqlite3
 db.sqlite3-journal
 
 # ======================================
-# ARCHIVOS DE DJANGO
-# ======================================
-# Archivos de migraciones compiladas
+# MIGRACIONES (solo archivos basura, NO las migraciones reales)
 */migrations/*.pyc
 */migrations/*.pyo
 */migrations/*~
-# Mantener migraciones excepto archivo __init__.py
-*/migrations/[0-9][0-9][0-9][0-9]_*.py
 
-# Archivos generados
+# ======================================
+# ARCHIVOS GENERADOS
+# ======================================
 staticfiles/
 media/
 dist/
@@ -48,7 +46,6 @@ build/
 # ======================================
 *.log
 *.out
-
 
 # ======================================
 # CACHE
@@ -61,23 +58,16 @@ __cache__/
 # ======================================
 # EDITORES
 # ======================================
-
-# VSCode
 .vscode/
-
-# PyCharm
 .idea/
 *.iml
 
 # ======================================
 # SISTEMA OPERATIVO
 # ======================================
-# Windows
 Thumbs.db
 ehthumbs.db
 Desktop.ini
-
-# MacOS
 .DS_Store
 .AppleDouble
 .LSOverride
