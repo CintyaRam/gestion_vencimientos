@@ -145,7 +145,7 @@ if os.environ.get("RAILWAY_ENVIRONMENT"):
 else:
     STATICFILES_DIRS = [ BASE_DIR / "static" ]
 
-    
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -153,3 +153,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.up.railway.app",
+    "https://gestionvencimientos-production.up.railway.app"
+]
