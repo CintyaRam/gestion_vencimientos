@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'gestion_vencimientos.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 
-if os.environ.get("RAILWAY_ENVIRONMENT"):
+if os.environ.get("RAILWAY_ENVIRONMENT_ID"):
     # Producción en Railway
     DATABASES = {
         "default": {
