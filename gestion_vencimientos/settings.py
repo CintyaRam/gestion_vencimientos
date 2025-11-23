@@ -79,8 +79,7 @@ WSGI_APPLICATION = 'gestion_vencimientos.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 
-if os.environ.get("RAILWAY_ENVIRONMENT_ID"):
-    # Producción en Railway
+if os.environ.get("RAILWAY_PUBLIC_DOMAIN"):
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
@@ -92,7 +91,6 @@ if os.environ.get("RAILWAY_ENVIRONMENT_ID"):
         }
     }
 else:
-    # Desarrollo local con SQLite
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
