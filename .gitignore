@@ -24,8 +24,8 @@ secrets.json
 # ======================================
 # BASE DE DATOS SQLITE
 # ======================================
-db.sqlite3
-db.sqlite3-journal
+#db.sqlite3
+#db.sqlite3-journal
 
 # ======================================
 # MIGRACIONES (solo archivos basura, NO las migraciones reales)
