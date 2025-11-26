@@ -1,29 +1,27 @@
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 import os
 
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
-        USER = os.environ.get("DJANGO_SUPERUSER_USERNAME")
-        PASS = os.environ.get("DJANGO_SUPERUSER_PASSWORD")  # HASH
-        EMAIL = os.environ.get("DJANGO_SUPERUSER_EMAIL")
+        User = get_user_model()
 
-        if not USER or not PASS:
-            print("Faltan variables.")
+        username = os.environ.get("DJANGO_SUPERUSER_USERNAME")
+        email = os.environ.get("DJANGO_SUPERUSER_EMAIL")
+        password = os.environ.get("DJANGO_SUPERUSER_PASSWORD")
+
+        if not username or not password or not email:
+            self.stdout.write(self.style.ERROR("Faltan variables de entorno"))
             return
 
-        if User.objects.filter(username=USER).exists():
-            print("El superusuario ya existe.")
+        if User.objects.filter(username=username).exists():
+            self.stdout.write(self.style.WARNING("El superusuario ya existe."))
             return
 
-        user = User.objects.create(
-            username=USER,
-            email=EMAIL,
-            is_superuser=True,
-            is_staff=True,
-            is_active=True,
+        User.objects.create_superuser(
+            username=username,
+            email=email,
+            password=password
         )
-        user.password = PASS
-        user.save()
 
-        print("Superusuario creado correctamente.")
+        self.stdout.write(self.style.SUCCESS("Superusuario creado correctamente."))
