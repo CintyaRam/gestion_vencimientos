@@ -93,9 +93,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # ==============================
 LANGUAGE_CODE = 'es'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Santiago'
+USE_TZ = False
 USE_I18N = True
-USE_TZ = True
 
 # ==============================
 # Static files
