@@ -15,28 +15,23 @@ def es_admin(user):
 
 
 def obtener_resumen_lotes_por_departamento():
-    """
-    Ejemplo de consulta SQL manual con connection.cursor()
-    Retorna un listado de diccionarios con:
-    - numero_departamento
-    - total_lotes_activos
-    - total_lotes_vencidos
-    """
-    with connection.cursor() as cursor:
-        cursor.execute("""
-            SELECT d.numero_departamento,
-                   COUNT(*) AS total_lotes_activos,
-                   SUM(CASE WHEN l.fecha_vencimiento <= CURDATE() THEN 1 ELSE 0 END) AS total_lotes_vencidos
-            FROM inventario_lote l
-            INNER JOIN inventario_articulo a ON l.articulo_id = a.id
-            INNER JOIN inventario_departamento d ON a.departamento_id = d.numero_departamento
-            WHERE l.activo = 1
-            GROUP BY d.numero_departamento
-            ORDER BY d.numero_departamento;
-        """)
-        columnas = [col[0] for col in cursor.description]
-        resultados = [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
-    return resultados
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                SELECT d.numero_departamento,
+                       COUNT(*) AS total_lotes_activos,
+                       SUM(CASE WHEN l.fecha_vencimiento <= DATE('now') THEN 1 ELSE 0 END) AS total_lotes_vencidos
+                FROM inventario_lote l
+                INNER JOIN inventario_articulo a ON l.articulo_id = a.id
+                INNER JOIN inventario_departamento d ON a.departamento_id = d.numero_departamento
+                WHERE l.activo = 1
+                GROUP BY d.numero_departamento
+                ORDER BY d.numero_departamento;
+            """)
+            columnas = [col[0] for col in cursor.description]
+            return [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
+    except Exception:
+        return []
 
 
 class HomeView(ListView):
