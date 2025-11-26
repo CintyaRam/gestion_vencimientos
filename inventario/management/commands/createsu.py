@@ -4,18 +4,27 @@ import os
 
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
-        print("=== Ejecutando createsu ===")
 
         USER = os.environ.get("DJANGO_SUPERUSER_USERNAME")
         PASS = os.environ.get("DJANGO_SUPERUSER_PASSWORD")
         EMAIL = os.environ.get("DJANGO_SUPERUSER_EMAIL")
 
-        print("USER:", USER)
-        print("EMAIL:", EMAIL)
-        print("PASS OK:", PASS is not None)
+        if not USER or not PASS:
+            print("Faltan variables de entorno.")
+            return
 
         if not User.objects.filter(username=USER).exists():
-            User.objects.create_superuser(USER, EMAIL, PASS)
-            print(">>> Superusuario creado con éxito.")
+
+            user = User.objects.create(
+                username=USER,
+                email=EMAIL,
+                is_superuser=True,
+                is_staff=True,
+                is_active=True,
+            )
+            user.password = PASS 
+            user.save()
+
+            print("Superusuario creado con contraseña hasheada.")
         else:
-            print(">>> El superusuario ya existe.")
+            print("El superusuario ya existe.")
