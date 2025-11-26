@@ -3,6 +3,8 @@ Django settings for gestion_vencimientos project.
 """
 
 from pathlib import Path
+import dj_database_url
+
 import os
 
 # Base directory
