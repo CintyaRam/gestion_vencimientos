@@ -2,22 +2,32 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.shortcuts import HttpResponseRedirect
-from django.contrib.auth.models import Group
-from .models import Articulo, Lote, Departamento
-from datetime import date, timedelta
-from .forms import ArticuloForm, LoteForm
 from django.db.models import Min
 from django.db import connection
+from datetime import date, timedelta
 
+from .models import Articulo, Lote, Departamento
+from .forms import ArticuloForm, LoteForm
+
+
+# ==========================================
+#  PERMISOS
+# ==========================================
 
 def es_admin(user):
-    return user.groups.filter(name='Administradores').exists()
+    """
+    Un usuario será considerado administrador si:
+    - Es superusuario, o
+    - Pertenece al grupo 'Administradores'.
+    """
+    return user.is_superuser or user.groups.filter(name='Administradores').exists()
 
+
+# ==========================================
+#  CONSULTA SQL RESUMEN
+# ==========================================
 
 def obtener_resumen_lotes_por_departamento():
-    """
-    Consulta SQL compatible con SQLite y PostgreSQL
-    """
     try:
         with connection.cursor() as cursor:
             cursor.execute("""
@@ -38,6 +48,10 @@ def obtener_resumen_lotes_por_departamento():
         return []
 
 
+# ==========================================
+#  HOME
+# ==========================================
+
 class HomeView(ListView):
     model = Lote
     template_name = 'home.html'
@@ -52,22 +66,26 @@ class HomeView(ListView):
         hoy = date.today()
         limite_amarillo = hoy + timedelta(days=7)
 
-        context['lotes_vencidos'] = Lote.objects.filter(
+        context["lotes_vencidos"] = Lote.objects.filter(
             activo=True, fecha_vencimiento__lte=hoy
         ).order_by('fecha_vencimiento')
 
-        context['lotes_alerta'] = Lote.objects.filter(
+        context["lotes_alerta"] = Lote.objects.filter(
             activo=True,
             fecha_vencimiento__gte=hoy,
             fecha_vencimiento__lte=limite_amarillo
         ).order_by('fecha_vencimiento')
 
-        context['resumen_sql_departamentos'] = obtener_resumen_lotes_por_departamento()
+        context["resumen_sql_departamentos"] = obtener_resumen_lotes_por_departamento()
 
-        context['es_administrador'] = es_admin(self.request.user) if self.request.user.is_authenticated else False
+        context["es_administrador"] = es_admin(self.request.user)
 
         return context
 
+
+# ==========================================
+#  LISTA ARTÍCULOS
+# ==========================================
 
 class ListaArticulosView(LoginRequiredMixin, ListView):
     model = Articulo
@@ -77,10 +95,12 @@ class ListaArticulosView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         qs = Articulo.objects.filter(activo=True).prefetch_related('lotes')
 
+        # Filtro por departamento
         departamento_filtro = self.request.GET.get('departamento')
         if departamento_filtro:
             qs = qs.filter(departamento__numero_departamento=departamento_filtro)
 
+        # Filtro por estado
         estado_filtro = self.request.GET.get('estado')
         if estado_filtro:
             articulos_filtrados = []
@@ -91,41 +111,45 @@ class ListaArticulosView(LoginRequiredMixin, ListView):
                         break
             qs = articulos_filtrados
 
-        articulos_con_fecha_proxima = []
+        # Ordenar por fecha de vencimiento más próxima
+        articulos_con_fecha = []
         for articulo in qs:
-            proximo_vto = articulo.lotes.filter(activo=True).aggregate(
+            fecha_min = articulo.lotes.filter(activo=True).aggregate(
                 Min('fecha_vencimiento')
             )['fecha_vencimiento__min']
-            articulos_con_fecha_proxima.append((articulo, proximo_vto))
+            articulos_con_fecha.append((articulo, fecha_min))
 
-        articulos_con_fecha_proxima.sort(
-            key=lambda x: x[1] if x[1] else date.max
-        )
+        articulos_con_fecha.sort(key=lambda x: x[1] if x[1] else date.max)
 
-        return [x[0] for x in articulos_con_fecha_proxima]
+        return [a[0] for a in articulos_con_fecha]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context['lotes_vencidos'] = Lote.objects.filter(
+        context["lotes_vencidos"] = Lote.objects.filter(
             activo=True,
             fecha_vencimiento__lte=date.today()
         ).order_by('fecha_vencimiento')
 
-        context['es_administrador'] = es_admin(self.request.user)
-        context['departamentos'] = Departamento.objects.all()
-        context['departamento_seleccionado'] = self.request.GET.get('departamento', '')
+        context["es_administrador"] = es_admin(self.request.user)
+        context["departamentos"] = Departamento.objects.all()
+        context["departamento_seleccionado"] = self.request.GET.get('departamento', '')
 
-        context['estados'] = [
+        context["estados"] = [
             'Vencido - Quitar de Sala inmediatamente',
             'Por vencer (tomar acción correctiva)',
             'Cerca de vencimiento',
             'Buen estado',
         ]
-        context['estado_seleccionado'] = self.request.GET.get('estado', '')
+
+        context["estado_seleccionado"] = self.request.GET.get('estado', '')
 
         return context
 
+
+# ==========================================
+#  CRUD LOTE
+# ==========================================
 
 class CrearLoteView(LoginRequiredMixin, CreateView):
     model = Lote
@@ -164,6 +188,10 @@ class EliminarLoteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         lote.save()
         return HttpResponseRedirect(self.success_url)
 
+
+# ==========================================
+#  CRUD ARTÍCULO
+# ==========================================
 
 class CrearArticuloView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Articulo
