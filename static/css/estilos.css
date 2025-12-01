@@ -1,73 +1,164 @@
+/* ==========================================
+   ESTILO GENERAL
+========================================== */
 body {
     background-color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* NAVBAR rojo supermercado */
+/* ==========================================
+   NAVBAR ROJO SUPERMERCADO
+========================================== */
 .navbar-custom {
     background-color: #b30000;
 }
+
 .navbar-custom .nav-link,
 .navbar-custom .navbar-brand {
-    color: #fff;
-}
-.navbar-custom .nav-link:hover,
-.navbar-custom .navbar-brand:hover {
-    color: #f2f2f2;
+    color: #fff !important;
 }
 
-/* ===================== HERO ===================== */
+.navbar-custom .nav-link:hover,
+.navbar-custom .navbar-brand:hover {
+    color: #f2f2f2 !important;
+}
+
+/* Asegura visibilidad del icon del toggler */
+.navbar-toggler {
+    background-color: #fff;
+    border: none;
+}
+
+/* Ícono hamburguesa más visible */
+.navbar-toggler-icon {
+    filter: invert(1);
+}
+
+/* ==========================================
+   HERO
+========================================== */
 .hero-super {
     position: relative;
     overflow: hidden;
     height: 380px;
+    border-radius: 8px;
 }
 
+/* Imagen del hero */
 .hero-bg {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: brightness(70%);
+    filter: brightness(60%);
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
 }
 
+/* Capa oscura */
 .hero-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0,0,0,0.35);
+    background: rgba(0, 0, 0, 0.45);
 }
 
+/* Contenido del hero */
 .hero-content {
     position: relative;
     z-index: 10;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.55);
 }
 
-/* SEMÁFORO */
+/* HERO RESPONSIVE */
+@media (max-width: 768px) {
+    .hero-super {
+        height: 260px;
+    }
+    .hero-content h1 {
+        font-size: 1.8rem;
+    }
+    .hero-content p {
+        font-size: 1rem;
+    }
+    .hero-content .btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-super {
+        height: 220px;
+    }
+    .hero-content h1 {
+        font-size: 1.5rem;
+    }
+    .hero-content p {
+        font-size: 0.9rem;
+    }
+}
+
+/* ==========================================
+   TABLAS RESPONSIVAS
+========================================== */
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* ==========================================
+   SEMÁFORO
+========================================== */
 .semaforo {
     font-weight: bold;
 }
+
 .semaforo.vencido-quitar-sala {
-    color: darkred;
-}
-.semaforo.por-vencer-tomar-accion-correctiva {
-    color: red;
-}
-.semaforo.cerca-de-vencimiento {
-    color: orange;
-}
-.semaforo.buen-estado {
-    color: green;
+    color: #8b0000;
 }
 
-/* MODAL */
+.semaforo.por-vencer-tomar-accion-correctiva {
+    color: #d90000;
+}
+
+.semaforo.cerca-de-vencimiento {
+    color: #ff8c00;
+}
+
+.semaforo.buen-estado {
+    color: #008000;
+}
+
+/* ==========================================
+   TARJETAS, MODALES Y BOTONES
+========================================== */
 .modal-content {
     border-radius: 8px;
+    border: none;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.25);
 }
 
-/* FOOTER */
+.btn-danger,
+.bg-danger {
+    background-color: #b30000 !important;
+}
+
+.btn-danger:hover {
+    background-color: #a00000 !important;
+}
+
+/* ==========================================
+   FOOTER
+========================================== */
 footer {
     background-color: #b30000;
     color: white;
     padding: 20px 0;
+    text-align: center;
+}
+
+/* ==========================================
+   LISTADOS Y ESPACIADOS
+========================================== */
+section,
+table {
+    margin-bottom: 25px;
 }
