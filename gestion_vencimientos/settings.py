@@ -17,7 +17,12 @@ SECRET_KEY = 'django-insecure-npew3znvt@*5hl)bd@*31#na&%$i*iy@^p=^+7w!&*#_)n4g!+
 DEBUG = False
 
 # Permitir Render
-ALLOWED_HOSTS = ["*",]
+ALLOWED_HOSTS = [
+    "gestion-vencimientos.onrender.com",
+    "localhost",
+    "127.0.0.1"
+]
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -119,5 +124,5 @@ LOGOUT_REDIRECT_URL = 'login'
 # Render domains
 # ==============================
 CSRF_TRUSTED_ORIGINS = [
-    "https://*.onrender.com",
+    "https://gestion-vencimientos.onrender.com"
 ]
