@@ -15,12 +15,16 @@ def es_admin(user):
 
 
 def obtener_resumen_lotes_por_departamento():
+    """
+    Consulta SQL compatible con SQLite y PostgreSQL
+    """
     try:
         with connection.cursor() as cursor:
             cursor.execute("""
-                SELECT d.numero_departamento,
-                       COUNT(*) AS total_lotes_activos,
-                       SUM(CASE WHEN l.fecha_vencimiento <= DATE('now') THEN 1 ELSE 0 END) AS total_lotes_vencidos
+                SELECT 
+                    d.numero_departamento,
+                    COUNT(*) AS total_lotes_activos,
+                    SUM(CASE WHEN l.fecha_vencimiento <= CURRENT_DATE THEN 1 ELSE 0 END) AS total_lotes_vencidos
                 FROM inventario_lote l
                 INNER JOIN inventario_articulo a ON l.articulo_id = a.id
                 INNER JOIN inventario_departamento d ON a.departamento_id = d.numero_departamento
@@ -40,28 +44,27 @@ class HomeView(ListView):
     context_object_name = 'lotes_proximos'
 
     def get_queryset(self):
-        # Filtrar lotes por activo y ordenar por fecha_vencimiento ascendente (más próximos primero)
         return Lote.objects.filter(activo=True).order_by('fecha_vencimiento')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['lotes_vencidos'] = Lote.objects.filter(
-            activo=True, fecha_vencimiento__lte=date.today()).order_by('fecha_vencimiento')
+
         hoy = date.today()
-        limite_rojo = hoy + timedelta(days=2)  # Incluye hoy, mañana, pasado
-        limite_amarillo = hoy + timedelta(days=7)  # Hasta 7 días desde hoy
+        limite_amarillo = hoy + timedelta(days=7)
+
+        context['lotes_vencidos'] = Lote.objects.filter(
+            activo=True, fecha_vencimiento__lte=hoy
+        ).order_by('fecha_vencimiento')
 
         context['lotes_alerta'] = Lote.objects.filter(
             activo=True,
             fecha_vencimiento__gte=hoy,
             fecha_vencimiento__lte=limite_amarillo
         ).order_by('fecha_vencimiento')
+
         context['resumen_sql_departamentos'] = obtener_resumen_lotes_por_departamento()
-        # Añadir la variable 'es_administrador' al contexto
-        if self.request.user.is_authenticated:
-            context['es_administrador'] = es_admin(self.request.user)
-        else:
-            context['es_administrador'] = False
+
+        context['es_administrador'] = es_admin(self.request.user) if self.request.user.is_authenticated else False
 
         return context
 
@@ -72,28 +75,22 @@ class ListaArticulosView(LoginRequiredMixin, ListView):
     context_object_name = 'articulos_ordenados'
 
     def get_queryset(self):
-        # Base: artículos activos con sus lotes
         qs = Articulo.objects.filter(activo=True).prefetch_related('lotes')
 
-        # Filtro por departamento (por número)
         departamento_filtro = self.request.GET.get('departamento')
         if departamento_filtro:
-            qs = qs.filter(
-                departamento__numero_departamento=departamento_filtro)
+            qs = qs.filter(departamento__numero_departamento=departamento_filtro)
 
-        # Filtro por estado del lote
         estado_filtro = self.request.GET.get('estado')
         if estado_filtro:
-            # Filtramos artículos que tengan al menos un lote con ese estado
             articulos_filtrados = []
             for articulo in qs:
                 for lote in articulo.lotes.filter(activo=True):
                     if lote.estado_vencimiento() == estado_filtro:
                         articulos_filtrados.append(articulo)
-                        break  # evita duplicados
+                        break
             qs = articulos_filtrados
 
-        # Ordenamiento por fecha de vencimiento más próxima
         articulos_con_fecha_proxima = []
         for articulo in qs:
             proximo_vto = articulo.lotes.filter(activo=True).aggregate(
@@ -102,26 +99,22 @@ class ListaArticulosView(LoginRequiredMixin, ListView):
             articulos_con_fecha_proxima.append((articulo, proximo_vto))
 
         articulos_con_fecha_proxima.sort(
-            key=lambda x: x[1] if x[1] is not None else date.max
+            key=lambda x: x[1] if x[1] else date.max
         )
 
-        return [item[0] for item in articulos_con_fecha_proxima]
+        return [x[0] for x in articulos_con_fecha_proxima]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
         context['lotes_vencidos'] = Lote.objects.filter(
             activo=True,
             fecha_vencimiento__lte=date.today()
         ).order_by('fecha_vencimiento')
 
         context['es_administrador'] = es_admin(self.request.user)
-
-        # Para el filtro por departamento (combobox)
         context['departamentos'] = Departamento.objects.all()
-
-        # Mantener el valor seleccionado en el filtro
-        context['departamento_seleccionado'] = self.request.GET.get(
-            'departamento', '')
+        context['departamento_seleccionado'] = self.request.GET.get('departamento', '')
 
         context['estados'] = [
             'Vencido - Quitar de Sala inmediatamente',
@@ -129,8 +122,6 @@ class ListaArticulosView(LoginRequiredMixin, ListView):
             'Cerca de vencimiento',
             'Buen estado',
         ]
-
-
         context['estado_seleccionado'] = self.request.GET.get('estado', '')
 
         return context

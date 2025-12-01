@@ -1,12 +1,28 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Inicio - Gestión de Vencimientos{% endblock %}
 
 {% block content %}
+
+<!-- HERO -->
+<section class="hero-super bg-danger position-relative text-white mb-5">
+    <img src="{% static 'img/hero_supermercado.png' %}" class="hero-bg" alt="Supermercado">
+    <div class="hero-overlay"></div>
+
+    <div class="container hero-content py-5">
+        <h1 class="display-4 fw-bold">Gestión de Vencimientos</h1>
+        <p class="lead">Control eficiente de lotes, artículos y fechas críticas</p>
+
+        <a href="{% url 'lista_articulos' %}" class="btn btn-light btn-lg mt-2 shadow">
+            Ver Artículos
+        </a>
+    </div>
+</section>
+
 <h2>Alertas de Vencimiento</h2>
 <p>Visualización general de lotes próximos a vencer.</p>
 
-<!-- Tabla para mostrar lotes ordenados por vencimiento -->
 <table class="table table-striped">
     <thead>
         <tr>
@@ -19,6 +35,7 @@
             <th>Acciones</th>
         </tr>
     </thead>
+
     <tbody>
         {% for lote in lotes_proximos %}
         <tr>
@@ -26,26 +43,31 @@
             <td>{{ lote.articulo.departamento.numero_departamento }}</td>
             <td>{{ lote.numero_lote }}</td>
             <td>{{ lote.fecha_vencimiento }}</td>
-            <!-- Semáforo de vencimiento -->
+
+            <!-- Semáforo -->
             <td>
                 {% if lote.estado_vencimiento == 'Vencido - Quitar de Sala inmediatamente' %}
-                <span class="semaforo vencido-quitar-sala">{{ lote.estado_vencimiento }}</span>
+                    <span class="semaforo vencido-quitar-sala">{{ lote.estado_vencimiento }}</span>
+
                 {% elif lote.estado_vencimiento == 'Por vencer (tomar acción correctiva)' %}
-                <span class="semaforo por-vencer-tomar-accion-correctiva">{{ lote.estado_vencimiento }}</span>
+                    <span class="semaforo por-vencer-tomar-accion-correctiva">{{ lote.estado_vencimiento }}</span>
+
                 {% elif lote.estado_vencimiento == 'Cerca de vencimiento' %}
-                <span class="semaforo cerca-de-vencimiento">{{ lote.estado_vencimiento }}</span>
-                {% else %} <!-- 'Buen estado' -->
-                <span class="semaforo buen-estado">{{ lote.estado_vencimiento }}</span>
+                    <span class="semaforo cerca-de-vencimiento">{{ lote.estado_vencimiento }}</span>
+
+                {% else %}
+                    <span class="semaforo buen-estado">{{ lote.estado_vencimiento }}</span>
                 {% endif %}
             </td>
+
             <td>{{ lote.responsable_registro.username }}</td>
+
             <td>
-                <!-- Botones de Editar/Eliminar Lote (condicional) -->
                 {% if user.is_authenticated %}
-                {% if es_administrador or lote.responsable_registro == user %}
-                <a href="{% url 'editar_lote' lote.pk %}" class="btn btn-warning btn-sm">Editar</a>
-                <a href="{% url 'eliminar_lote' lote.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
-                {% endif %}
+                    {% if es_administrador or lote.responsable_registro == user %}
+                        <a href="{% url 'editar_lote' lote.pk %}" class="btn btn-warning btn-sm">Editar</a>
+                        <a href="{% url 'eliminar_lote' lote.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
+                    {% endif %}
                 {% endif %}
             </td>
         </tr>
@@ -55,6 +77,7 @@
 
 
 <h3>Resumen por departamento</h3>
+
 <table class="table table-sm">
     <thead>
         <tr>
@@ -63,6 +86,7 @@
             <th>Lotes vencidos</th>
         </tr>
     </thead>
+
     <tbody>
         {% for fila in resumen_sql_departamentos %}
         <tr>
@@ -77,37 +101,5 @@
         {% endfor %}
     </tbody>
 </table>
-<!-- Modal -->
-<div class="modal fade" id="modalVencidos" tabindex="-1" aria-labelledby="modalVencidosLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="modalVencidosLabel">Lotes Vencidos</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-
-            <div class="modal-body">
-                <ul id="lista-vencidos" class="list-group">
-                    {% for lote in lotes_vencidos %}
-                    <li class="list-group-item">
-                        {{ lote.articulo.nombre }} — Depto: {{ lote.articulo.departamento.numero_departamento }} —
-                        Lote: {{ lote.numero_lote }} — Vencido el: <strong>{{ lote.fecha_vencimiento }}</strong>
-                    </li>
-                    {% empty %}
-                    <li class="list-group-item text-muted" data-empty="true">
-                        No hay productos vencidos.
-                    </li>
-                    {% endfor %}
-                </ul>
-            </div>
-
-            <div class="modal-footer">
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-            </div>
-
-        </div>
-    </div>
-</div>
 
 {% endblock %}

@@ -4,17 +4,65 @@ body {
 
 /* NAVBAR rojo supermercado */
 .navbar-custom {
-    background-color: #b30000; /* rojo supermercado */
+    background-color: #b30000;
 }
-
 .navbar-custom .nav-link,
 .navbar-custom .navbar-brand {
     color: #fff;
 }
-
 .navbar-custom .nav-link:hover,
 .navbar-custom .navbar-brand:hover {
-    color: #f5f5f5;
+    color: #f2f2f2;
+}
+
+/* ===================== HERO ===================== */
+.hero-super {
+    position: relative;
+    overflow: hidden;
+    height: 380px;
+}
+
+.hero-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(70%);
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 10;
+}
+
+/* SEMÁFORO */
+.semaforo {
+    font-weight: bold;
+}
+.semaforo.vencido-quitar-sala {
+    color: darkred;
+}
+.semaforo.por-vencer-tomar-accion-correctiva {
+    color: red;
+}
+.semaforo.cerca-de-vencimiento {
+    color: orange;
+}
+.semaforo.buen-estado {
+    color: green;
+}
+
+/* MODAL */
+.modal-content {
+    border-radius: 8px;
 }
 
 /* FOOTER */
@@ -22,29 +70,4 @@ footer {
     background-color: #b30000;
     color: white;
     padding: 20px 0;
-}
-
-/* SEMÁFORO DE ESTADOS */
-.semaforo.vencido-quitar-sala {
-    color: darkred;
-    font-weight: bold;
-}
-
-.semaforo.por-vencer-tomar-accion-correctiva {
-    color: red;
-    font-weight: bold;
-}
-
-.semaforo.cerca-de-vencimiento {
-    color: orange;
-    font-weight: bold;
-}
-
-.semaforo.buen-estado {
-    color: green;
-}
-
-
-.modal-content {
-    border-radius: 8px;
 }
