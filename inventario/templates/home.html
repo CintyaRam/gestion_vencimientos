@@ -107,4 +107,37 @@
 
 </div>
 
+<!-- ===================== MODAL LOTES VENCIDOS ===================== -->
+<div class="modal fade" id="modalVencidos" tabindex="-1" aria-labelledby="modalVencidosLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="modalVencidosLabel">Lotes Vencidos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body">
+                <ul id="lista-vencidos" class="list-group">
+                    {% for lote in lotes_vencidos %}
+                    <li class="list-group-item">
+                        {{ lote.articulo.nombre }} — Depto: {{ lote.articulo.departamento.numero_departamento }} —
+                        Lote: {{ lote.numero_lote }} — Vencido el <strong>{{ lote.fecha_vencimiento }}</strong>
+                    </li>
+                    {% empty %}
+                    <li class="list-group-item text-muted" data-empty="true">
+                        No hay productos vencidos.
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 {% endblock %}
