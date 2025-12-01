@@ -6,100 +6,105 @@
 {% block content %}
 
 <!-- HERO -->
-<section class="hero-super bg-danger position-relative text-white mb-5">
+<section class="hero-super position-relative text-white mb-5">
     <img src="{% static 'img/hero_supermercado.png' %}" class="hero-bg" alt="Supermercado">
     <div class="hero-overlay"></div>
 
-    <div class="container hero-content py-5">
+    <div class="container hero-content py-5 text-center text-md-start">
         <h1 class="display-4 fw-bold">Gestión de Vencimientos</h1>
-        <p class="lead">Control eficiente de lotes, artículos y fechas críticas</p>
+        <p class="lead mb-3">Control eficiente de lotes, artículos y fechas críticas</p>
 
-        <a href="{% url 'lista_articulos' %}" class="btn btn-light btn-lg mt-2 shadow">
+        <a href="{% url 'lista_articulos' %}" class="btn btn-light btn-lg shadow">
             Ver Artículos
         </a>
     </div>
 </section>
 
-<h2>Alertas de Vencimiento</h2>
-<p>Visualización general de lotes próximos a vencer.</p>
+<!-- ================= ALERTAS ================= -->
+<div class="container">
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Artículo</th>
-            <th>Departamento</th>
-            <th>Número Lote</th>
-            <th>Fecha Vencimiento</th>
-            <th>Estado</th>
-            <th>Responsable</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
+    <h2 class="mb-2">Alertas de Vencimiento</h2>
+    <p class="text-muted">Visualización general de lotes próximos a vencer.</p>
 
-    <tbody>
-        {% for lote in lotes_proximos %}
-        <tr>
-            <td>{{ lote.articulo.nombre }}</td>
-            <td>{{ lote.articulo.departamento.numero_departamento }}</td>
-            <td>{{ lote.numero_lote }}</td>
-            <td>{{ lote.fecha_vencimiento }}</td>
+    <div class="table-responsive shadow-sm rounded mb-4">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-danger text-center">
+                <tr>
+                    <th>Artículo</th>
+                    <th>Departamento</th>
+                    <th>N° Lote</th>
+                    <th>Fecha Vencimiento</th>
+                    <th>Estado</th>
+                    <th>Responsable</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lote in lotes_proximos %}
+                <tr>
+                    <td>{{ lote.articulo.nombre }}</td>
+                    <td>{{ lote.articulo.departamento.numero_departamento }}</td>
+                    <td>{{ lote.numero_lote }}</td>
+                    <td>{{ lote.fecha_vencimiento }}</td>
 
-            <!-- Semáforo -->
-            <td>
-                {% if lote.estado_vencimiento == 'Vencido - Quitar de Sala inmediatamente' %}
-                    <span class="semaforo vencido-quitar-sala">{{ lote.estado_vencimiento }}</span>
+                    <!-- Estado semáforo -->
+                    <td>
+                        {% with estado=lote.estado_vencimiento %}
+                            <span class="semaforo {{ estado|slugify }}">
+                                {{ estado }}
+                            </span>
+                        {% endwith %}
+                    </td>
 
-                {% elif lote.estado_vencimiento == 'Por vencer (tomar acción correctiva)' %}
-                    <span class="semaforo por-vencer-tomar-accion-correctiva">{{ lote.estado_vencimiento }}</span>
+                    <td>{{ lote.responsable_registro.username }}</td>
 
-                {% elif lote.estado_vencimiento == 'Cerca de vencimiento' %}
-                    <span class="semaforo cerca-de-vencimiento">{{ lote.estado_vencimiento }}</span>
+                    <td class="text-center">
+                        {% if user.is_authenticated %}
+                            {% if es_administrador or lote.responsable_registro == user %}
+                            <a href="{% url 'editar_lote' lote.pk %}" class="btn btn-warning btn-sm me-1">
+                                Editar
+                            </a>
+                            <a href="{% url 'eliminar_lote' lote.pk %}" class="btn btn-danger btn-sm">
+                                Eliminar
+                            </a>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-                {% else %}
-                    <span class="semaforo buen-estado">{{ lote.estado_vencimiento }}</span>
-                {% endif %}
-            </td>
+    <!-- =============== RESUMEN POR DEPARTAMENTO =============== -->
+    <h3 class="mt-4">Resumen por departamento</h3>
 
-            <td>{{ lote.responsable_registro.username }}</td>
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-sm align-middle">
+            <thead class="table-secondary">
+                <tr>
+                    <th>Depto</th>
+                    <th>Lotes activos</th>
+                    <th>Lotes vencidos</th>
+                </tr>
+            </thead>
 
-            <td>
-                {% if user.is_authenticated %}
-                    {% if es_administrador or lote.responsable_registro == user %}
-                        <a href="{% url 'editar_lote' lote.pk %}" class="btn btn-warning btn-sm">Editar</a>
-                        <a href="{% url 'eliminar_lote' lote.pk %}" class="btn btn-danger btn-sm">Eliminar</a>
-                    {% endif %}
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            <tbody>
+                {% for fila in resumen_sql_departamentos %}
+                <tr>
+                    <td>{{ fila.numero_departamento }}</td>
+                    <td>{{ fila.total_lotes_activos }}</td>
+                    <td>{{ fila.total_lotes_vencidos }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-muted">Sin datos de lotes.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
-
-<h3>Resumen por departamento</h3>
-
-<table class="table table-sm">
-    <thead>
-        <tr>
-            <th>Depto</th>
-            <th>Lotes activos</th>
-            <th>Lotes vencidos</th>
-        </tr>
-    </thead>
-
-    <tbody>
-        {% for fila in resumen_sql_departamentos %}
-        <tr>
-            <td>{{ fila.numero_departamento }}</td>
-            <td>{{ fila.total_lotes_activos }}</td>
-            <td>{{ fila.total_lotes_vencidos }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="3" class="text-muted">Sin datos de lotes.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+</div>
 
 {% endblock %}
